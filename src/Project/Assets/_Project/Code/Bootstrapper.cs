@@ -14,6 +14,7 @@ namespace Project
         private IAuthenticationService _authenticationService;
         private RemoteConfig _remoteConfig;
         private AssetProvider _assetProvider;
+        private SaveSystem _saveSystem;
 
         private const float DelayForInitializeSystems = 1.5f;
         
@@ -29,8 +30,9 @@ namespace Project
             _firebaseService = new FirebaseService(_userProvider);
             _authenticationService = new AuthenticationService(_firebaseService);
             _remoteConfig = new RemoteConfig();
+            _saveSystem = new SaveSystem();
 
-            _uiProvider.MainView.SetDependency(_assetProvider, _uiProvider, _remoteConfig);
+            _uiProvider.MainView.SetDependency(_assetProvider, _uiProvider, _remoteConfig, _saveSystem);
         }
 
         private async void Start()
@@ -47,10 +49,11 @@ namespace Project
             if (_authenticationService.IsSignedIn == false) 
                 await _authenticationService.SignInAnonymouslyAsync();
 
+            _saveSystem.Load();
+            
             await UniTask.WaitForSeconds(DelayForInitializeSystems);
             
             _uiProvider.LoadingView.Hide();
-            
             _uiProvider.MainView.UpdateDisplay();
             _uiProvider.MainView.Show();
         }

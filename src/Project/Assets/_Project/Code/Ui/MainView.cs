@@ -22,21 +22,25 @@ namespace Project.Ui
         private AssetProvider _assetProvider;
         private UiProvider _uiProvider;
         private RemoteConfig _remoteConfig;
-
-        private int _counter;
+        private SaveSystem _saveSystem;
         
+        private int _counter;
+
         private const string AssetName = "BackgroundButton";
 
         private void OnDestroy()
         {
+            SaveCounter();
             UnsubscribeOnEvents();
         }
 
-        public void SetDependency(AssetProvider assetProvider, UiProvider uiProvider, RemoteConfig remoteConfig)
+        public void SetDependency(AssetProvider assetProvider, UiProvider uiProvider, RemoteConfig remoteConfig,
+            SaveSystem saveSystem)
         {
             _assetProvider = assetProvider;
             _uiProvider = uiProvider;
             _remoteConfig = remoteConfig;
+            _saveSystem = saveSystem;
             
             SubscribeOnEvents();
         }
@@ -50,7 +54,9 @@ namespace Project.Ui
         
         public void UpdateDisplay()
         {
-            _counter = _remoteConfig.Settings.startingNumber;
+            _counter = _saveSystem.SaveData.Counter != -1
+                ? _saveSystem.SaveData.Counter 
+                : _remoteConfig.Settings.startingNumber;
 
             UpdateCounterText();
             UpdateHelloText();
@@ -99,6 +105,12 @@ namespace Project.Ui
             UpdateDisplay();
             
             _uiProvider.LoadingView.Hide();
+        }
+
+        private void SaveCounter()
+        {
+            _saveSystem.SaveData.Counter = _counter;
+            _saveSystem.Save();
         }
         
         private void SubscribeOnEvents()
