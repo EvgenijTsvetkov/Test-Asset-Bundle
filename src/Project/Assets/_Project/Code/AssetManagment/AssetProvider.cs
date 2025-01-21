@@ -13,7 +13,7 @@ namespace Project.Services
         
         public Sprite GetSprite(string assetName)
         {
-            return _bundle.IsLoaded() 
+            return _bundle != null
                 ? _bundle.LoadAsset<Sprite>(assetName) 
                 : null;
         }
