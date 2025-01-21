@@ -16,30 +16,52 @@ namespace Project.Ui
         [SerializeField] private Button _incrementCounterButton;
         [SerializeField] private Button _updateContentButton;
        
+        [Header("Image")]
+        [SerializeField] private Image _incrementBackgroundButton;
+        
+        private AssetProvider _assetProvider;
         private UiProvider _uiProvider;
         private RemoteConfig _remoteConfig;
 
         private int _counter;
+        
+        private const string AssetName = "BackgroundButton";
 
         private void OnDestroy()
         {
             UnsubscribeOnEvents();
         }
-        
-        public void SetDependency(UiProvider uiProvider, RemoteConfig remoteConfig)
+
+        public void SetDependency(AssetProvider assetProvider, UiProvider uiProvider, RemoteConfig remoteConfig)
         {
+            _assetProvider = assetProvider;
             _uiProvider = uiProvider;
             _remoteConfig = remoteConfig;
             
             SubscribeOnEvents();
         }
 
-        private void OnUpdateConfigsHandler()
+        public override void Show()
+        {
+            base.Show();
+
+            UpdateBackgroundButton();
+        }
+        
+        public void UpdateDisplay()
         {
             _counter = _remoteConfig.Settings.startingNumber;
 
             UpdateCounterText();
             UpdateHelloText();
+            UpdateBackgroundButton();
+        }
+
+        private void UpdateBackgroundButton()
+        {
+            var background = _assetProvider.GetSprite(AssetName);
+            if (background != null) 
+                _incrementBackgroundButton.sprite = background;
         }
 
         private void OnClickIncrementButtonHandler()
@@ -71,23 +93,22 @@ namespace Project.Ui
             _uiProvider.LoadingView.Show();
             
             await _remoteConfig.UpdateConfigs();
+            await _assetProvider.LoadBundle();
             await UniTask.WaitForSeconds(delayTime);
+
+            UpdateDisplay();
             
             _uiProvider.LoadingView.Hide();
         }
         
         private void SubscribeOnEvents()
         {
-            _remoteConfig.OnUpdateConfigs += OnUpdateConfigsHandler;
-            
             _incrementCounterButton.onClick.AddListener(OnClickIncrementButtonHandler);
             _updateContentButton.onClick.AddListener(OnClickUpdateContentButtonHandler);
         }
 
         private void UnsubscribeOnEvents()
         {
-            _remoteConfig.OnUpdateConfigs -= OnUpdateConfigsHandler;
-            
             _incrementCounterButton.onClick.RemoveListener(OnClickIncrementButtonHandler);
             _updateContentButton.onClick.RemoveListener(OnClickUpdateContentButtonHandler); 
         }

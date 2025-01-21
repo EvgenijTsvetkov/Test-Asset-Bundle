@@ -1,4 +1,3 @@
-using System;
 using Cysharp.Threading.Tasks;
 using Firebase.Extensions;
 using Firebase.RemoteConfig;
@@ -17,8 +16,6 @@ namespace Project.Services
         
         public DescriptionsConfig Descriptions => _descriptions;
         public bool IsLoaded { get; private set; }
-
-        public event Action OnUpdateConfigs;
 
         private const string SettingsKey = "settings";
         private const string DescriptionKey = "descriptions";
@@ -59,8 +56,6 @@ namespace Project.Services
                         _descriptions = JsonUtility.FromJson<DescriptionsConfig>(configStringValue);
 
                         IsLoaded = true;
-
-                        OnUpdateConfigs?.Invoke();
                     });
             }
         }
